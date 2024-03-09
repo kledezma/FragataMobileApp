@@ -1,0 +1,96 @@
+﻿@page "/asistencialist"
+@using FragataAssist.Data
+@using FragataAssist.Services.AsistenciaService
+@inject IAsistenciaRepository _asistenciaRepository
+@inject NavigationManager navigationManager
+
+
+<h3>Asistencia @scurrentDate</h3>
+
+@if (asistenciaList == null)
+{
+    <p><em>No existen asistencias</em></p>
+}
+else
+{
+    <button class="btn btn-primary" @onclick="AddAsistencia">Agregar Asistencia</button>
+    <button class="btn btn-danger" @onclick="Delete">Borrar Todo</button>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Cedula</th>
+                <th>Hora</th>
+                <th></th>
+
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var asistencia in asistenciaList)
+            {
+                <tr>
+                    <td>@asistencia.IdAlumno</td>
+
+
+                    <td>@asistencia.Hora.ToShortDateString() @asistencia.Hora.ToShortTimeString()</td>
+
+                    @if (@asistencia.EntradaSalida)
+
+                    {
+                        <td>Entrada</td>
+                    }
+                    else
+                    {
+                        <td>Salida</td>
+                    }
+ 
+                    
+                        @*<td>
+                        <button class="btn-info" @onclick=@(()=> UpdateAsistencia(asistencia))>Edit</button>
+                        <button class="btn-info" @onclick=@(()=> DeleteAsistencia(asistencia))>Delete</button>
+                        </td> *@
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IEnumerable<Asistencia> asistenciaList;
+    private DateTime dtcurrentDate;
+    private string scurrentDate;
+
+    protected override async Task OnInitializedAsync()
+    {
+        asistenciaList = await _asistenciaRepository.GetAllAsistenciasAsync();
+        dtcurrentDate = DateTime.Now;
+        scurrentDate = dtcurrentDate.ToShortDateString();
+    }
+
+    public void AddAsistencia()
+    {
+        navigationManager.NavigateTo("addasistencia");
+    }
+
+    public async void Delete()
+    {
+        await _asistenciaRepository.DeleteAsistenciasAsync();
+        asistenciaList = await _asistenciaRepository.GetAllAsistenciasAsync();
+
+        this.StateHasChanged();
+    }
+
+    // public void UpdateAsistencia(Asistencia objAsistencia)
+    // {
+    //     navigationManager.NavigateTo($"updateasistencia/{objAsistencia.IdAsistencia}");
+
+    // }
+    // public async void DeleteAsistencia(Asistencia objAsistencia)
+    // {
+    //     await _asistenciaRepository.DeleteAsistenciaAsync(objAsistencia.IdAsistencia);
+    //     asistenciaList = await _asistenciaRepository.GetAllAsistenciasAsync();
+    //     this.StateHasChanged();
+    // }
+
+}
+

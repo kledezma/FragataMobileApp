@@ -1,0 +1,68 @@
+﻿@page "/alumnolist"
+@using FragataAssist.Services.AlumnoService
+@using FragataAssist.Data
+@inject IAlumnoRepository _alumnoRepository
+@inject NavigationManager navigationManager
+
+<h3>Alumnos</h3>
+
+@if (alumnoList == null)
+{
+    <p><em>No existen alumnos</em></p>
+}
+else
+{
+    <button class="btn btn-primary" @onclick="AddAlumno">Agregar Alumno</button>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Cedula</th>
+                <th>Nombre</th>
+                <th>Activo</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var alumno in alumnoList)
+            {
+                <tr>
+                    <td>@alumno.IdAlumno</td>
+                    <td>@alumno.Nombre</td>
+                    <td>@alumno.Activo</td>
+                    <td>
+                        <button class="btn-info" @onclick=@(()=> UpdateAlumno(alumno))>Edit</button>
+                        <button class="btn-info" @onclick=@(()=> DeleteAlumno(alumno))>Delete</button>
+
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IEnumerable<Alumno> alumnoList;
+
+    protected override async Task OnInitializedAsync()
+    {
+       alumnoList = await _alumnoRepository.GetAllAlumnosAsync();
+    }
+
+    public void AddAlumno()
+    {
+        navigationManager.NavigateTo("addalumno");
+    }
+
+    public void UpdateAlumno(Alumno objAlumno)
+    {
+        navigationManager.NavigateTo($"updatealumno/{objAlumno.IdAlumno}");
+
+    }
+    public async void DeleteAlumno(Alumno objAlumno)
+    {
+        await _alumnoRepository.DeleteAlumnoAsync(objAlumno.IdAlumno);
+        alumnoList = await _alumnoRepository.GetAllAlumnosAsync();
+        this.StateHasChanged();
+    }
+
+}

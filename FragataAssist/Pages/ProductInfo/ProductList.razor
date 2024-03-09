@@ -1,0 +1,72 @@
+﻿@page "/productlist"
+@using FragataAssist.Services.ProductService
+@using FragataAssist.Data
+@inject IProductRepository _productRepository
+@inject NavigationManager navigationManager
+
+<h3>ProductList</h3>
+
+@if (prodList == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <button class="btn btn-primary" @onclick="AddProduct">Add Producto</button>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>nombre</th>
+                <th>precio</th>
+                <th>cantidad</th>
+                <th>hora</th>
+                <th>fecha</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var prod in prodList)
+            {
+                <tr>
+                    <td>@prod.Name</td>
+                    <td>@prod.Price</td>
+                    <td>@prod.Qty</td>
+                    <td>@prod.Hora.ToShortTimeString()</td>
+                    <td>@prod.Hora.ToShortDateString()</td>
+                    <td>
+                        <button class="btn-info" @onclick=@(()=> UpdateProduct(prod))>Edit</button>
+                        <button class="btn-info" @onclick=@(()=> DeleteProduct(prod))>Delete</button>
+
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IEnumerable<ProductInfo> prodList;
+
+    protected override async Task OnInitializedAsync()
+    {
+        prodList = await _productRepository.GetProductsAsync();
+    }
+
+    public void AddProduct()
+    {
+        navigationManager.NavigateTo("addupdateproduct");
+    }
+
+    public void UpdateProduct(ProductInfo productInfo)
+    {
+        navigationManager.NavigateTo($"updateproduct/{productInfo.Id}");
+
+    }
+    public async void DeleteProduct(ProductInfo productInfo)
+    {
+        await _productRepository.DeleteProductAsync(productInfo.Id);
+        prodList = await _productRepository.GetProductsAsync();
+        this.StateHasChanged();
+    }
+
+}

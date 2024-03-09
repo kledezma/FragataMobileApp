@@ -1,0 +1,105 @@
+﻿@page "/addupdateproduct"
+@page "/updateproduct/{Id:int}"
+@using FragataAssist.Services.ProductService
+@using FragataAssist.Data
+@inject IProductRepository _productRepository
+@inject NavigationManager navigationManager
+
+
+<h3>AddUpdateProductPage</h3>
+
+<div class="row">
+    <div class="col-md-6">
+            <div class ="mb-3">
+                <label class="form-label">Id</label>
+            <input type="text" @bind="prodId" class="form-control" placeholder="Id" readonly />
+        </div>
+            <div class ="mb-3">
+                <label class="form-label">Name</label>
+            <input type="text" @bind="prodName" class="form-control" placeholder="Name" />
+        </div>
+            <div class ="mb-3">
+                <label class="form-label">Qty</label>
+            <input type="text" @bind="prodQty" class="form-control" placeholder="Qty" />
+        </div>
+            <div class ="mb-3">
+                <label class="form-label">Price</label>
+            <input type="text" @bind="prodPrice" class="form-control" placeholder="Price" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Hora</label>
+            <input type="time" @bind="prodHora" class="form-control" placeholder="Price" />
+        </div>
+
+        
+        <button type="submit" class="btn btn-sm btn-success" @onclick="AddProduct">Submit</button>
+        <button type="submit" class="btn btn-sm btn-danger" @onclick="BackToList">Back</button>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private int prodId = 0;
+    private string prodName = "";
+    private int prodQty = 0;
+    private decimal prodPrice = 0;
+    private DateTime prodHora;
+    private DateTime prodFecha;
+
+    protected async override void OnInitialized()
+    {
+        base.OnInitialized();
+        prodId = Id;
+        if(prodId > 0)
+        {
+            var response = await _productRepository.GetProductAsync(prodId);
+            prodName = response.Name;
+            prodQty = response.Qty;
+            prodPrice = response.Price;
+            prodHora = response.Hora;
+            prodFecha = response.Fecha;
+            this.StateHasChanged();
+        }
+    }
+
+
+
+    public async void AddProduct()
+    {
+        var prod = new ProductInfo();
+        prod.Id = prodId;
+        prod.Name = prodName;
+        prod.Qty = prodQty;
+        prod.Price = prodPrice;
+        prod.Hora = prodHora;
+        prod.Fecha = prodFecha;
+
+
+
+        var response = await _productRepository.AddUpdateProductAsync(prod);
+
+        if (response)
+        {
+            if(prodId == 0)
+            {
+                await App.Current.MainPage.DisplayAlert("Saved", "Saved Success", "Ok");
+            }
+            else
+            {
+                await App.Current.MainPage.DisplayAlert("Updated", "Update Success", "Ok");
+            }
+        }
+        else
+        {
+            await App.Current.MainPage.DisplayAlert("Saved", "Saved Failed", "Ok");
+        }
+    }
+
+    public void BackToList()
+    {
+        navigationManager.NavigateTo("productlist");
+    }
+
+}

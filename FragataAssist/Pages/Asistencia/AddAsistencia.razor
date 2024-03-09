@@ -1,0 +1,101 @@
+﻿@page "/addasistencia"
+@using FragataAssist.Data
+@using FragataAssist.Services.AsistenciaService
+@using FragataAssist.Services.AlumnoService
+@inject IAsistenciaRepository _asistenciaRepository
+@inject IAlumnoRepository _alumnoRepository
+
+@inject NavigationManager navigationManager
+
+<h3>Agregar Entrada / Salida</h3>
+
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="mb-3">
+            <img src="@imageSource" class="avatar" />
+
+            <br />
+            <br />
+            <label class="form-label">Cedula</label>
+            <input type="text" @bind="alumnId" @oninput="chgCedula" class="form-control" placeholder="Id" />
+        </div>
+        <div class="mb-3">
+@*             <label class="form-label">Entrada / Salida</label>
+            <input type="checkbox" /> *@
+
+            Entrada
+            <label class="switch">
+                <input type="checkbox"  @bind="entradaSalida" >
+                <span class="slider round"></span>
+            </label>
+            Salida
+        </div>
+     
+        <button type="submit" class="btn btn-sm btn-success" @onclick="AddAlumno">Agregar</button>
+        <button type="submit" class="btn btn-sm btn-danger" @onclick="BackToList">Regresar</button>
+    </div>
+</div>
+
+@code {
+
+    private string alumnId = "";
+    private string alumndNombre = "";
+    private bool entradaSalida = false;
+    private DateTime dtcurrentDate;
+    private string scurrentDate;
+    private string imageSource = "images/ic_launcher.png";
+    private string originalSource = "images/ic_launcher.png";
+
+    protected async override void OnInitialized()
+    {
+        base.OnInitialized();
+
+    }
+
+    public async void AddAlumno()
+    {
+        dtcurrentDate = DateTime.Now;
+        var newAsistencia = new Asistencia();
+        newAsistencia.IdAlumno = alumnId;
+        newAsistencia.Hora = dtcurrentDate;
+        newAsistencia.EntradaSalida = !entradaSalida;
+
+
+
+        var response = await _asistenciaRepository.AddUpdateAsistenciaAsync(newAsistencia);
+
+        if (response)
+        {
+            await App.Current.MainPage.DisplayAlert("Saved", "Saved Success", "Ok");
+            navigationManager.NavigateTo("asistencialist");
+
+        }
+        else
+        {
+            await App.Current.MainPage.DisplayAlert("Saved", "Saved Failed", "Ok");
+        }
+
+    }
+
+    public async void chgCedula(ChangeEventArgs args)
+    {
+        string cedula = (string)args.Value;
+        var exist = await _alumnoRepository.GetAlumnoAsync(cedula);
+
+        if (exist != null)
+        {
+            imageSource = exist.Foto;
+        }
+        else { 
+            imageSource = originalSource; 
+        }
+        this.StateHasChanged();
+    }
+
+    public void BackToList()
+    {
+        navigationManager.NavigateTo("asistencialist");
+    }
+
+}

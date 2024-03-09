@@ -1,0 +1,164 @@
+﻿@page "/addalumno"
+@page "/updatealumno/{Id}"
+
+@using FragataAssist.Services.AlumnoService
+@using FragataAssist.Data
+@inject IAlumnoRepository _alumnoRepository
+@inject NavigationManager navigationManager
+
+<h3>Alumno</h3>
+
+<div class="row">
+    <div class="col-md-6">
+        <img src="@imageSource" class="avatar" />
+
+        <div class="mb-3">
+            <label class="form-label">Cedula</label>
+            @if (Id == "" || Id == null)
+
+            {
+                <input type="text" @bind="alumnId" class="form-control" placeholder="Id" />
+            }
+            else
+            {
+                <input type="text" @bind="alumnId" class="form-control" placeholder="Id" readonly />
+            }
+
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Nombre</label>
+            <input type="text" @bind="alumndNombre" class="form-control" placeholder="Name" />
+            @*            @if (this.Id == "")
+            {
+                <input type="text" @bind="alumndNombre" class="form-control" placeholder="Name" />
+            }
+            else
+            {
+                <input type="text" @bind="alumndNombre" class="form-control" placeholder="Name" readonly />
+            } *@
+
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Activo</label>
+            <input type="checkbox" @bind="alumnActivo" />
+        </div>
+
+
+        <button type="submit" class="btn btn-sm btn-success" @onclick="AddAlumno">Agregar</button>
+        <button type="submit" class="btn btn-sm btn-success" @onclick="TakePhoto">Foto</button>
+
+        <button type="submit" class="btn btn-sm btn-danger" @onclick="BackToList">Regresar</button>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+    private string alumnId = "";
+    private string alumndNombre = "";
+    private bool alumnActivo = true;
+    private string imageSource = "";
+    protected async override void OnInitialized()
+    {
+        base.OnInitialized();
+        imageSource = "images/ic_launcher.png";
+
+        string path = Directory.GetCurrentDirectory();
+
+        if (Directory.Exists("images/ic_launcher.png"))
+        {
+            var x = "";
+        }
+
+        alumnId = Id;
+        if (alumnId != "" && alumnId != null)
+        {
+            var response = await _alumnoRepository.GetAlumnoAsync(alumnId);
+            alumnId = response.IdAlumno;
+            alumndNombre = response.Nombre;
+            alumnActivo = response.Activo;
+            imageSource = response.Foto;
+            this.StateHasChanged();
+        }
+    }
+
+    public async void AddAlumno()
+    {
+        var alumno = new Alumno();
+        alumno.IdAlumno = alumnId;
+        alumno.Nombre = alumndNombre;
+        alumno.Activo = alumnActivo;
+        alumno.Foto = imageSource;
+
+        var alreadyExist = await _alumnoRepository.GetAlumnoAsync(alumnId);
+
+        if (alreadyExist != null && alreadyExist.Nombre != alumno.Nombre)
+        {
+            await App.Current.MainPage.DisplayAlert("Error", "No se puede guardar más de un usuario con la misma cedula", "Ok");
+        }
+        else
+        {
+
+            var response = await _alumnoRepository.AddUpdateAlumnoAsync(alumno);
+
+            if (response)
+            {
+                if (Id == "" || Id == null)
+                {
+                    await App.Current.MainPage.DisplayAlert("Saved", "Saved Success", "Ok");
+                    navigationManager.NavigateTo("Alumnolist");
+
+                }
+                else
+                {
+                    await App.Current.MainPage.DisplayAlert("Updated", "Update Success", "Ok");
+                    navigationManager.NavigateTo("Alumnolist");
+
+                }
+            }
+            else
+            {
+                await App.Current.MainPage.DisplayAlert("Saved", "Saved Failed", "Ok");
+            }
+        }
+    }
+
+    public void BackToList()
+    {
+        navigationManager.NavigateTo("Alumnolist");
+    }
+
+    public async void TakePhoto()
+    {
+        if (MediaPicker.Default.IsCaptureSupported)
+        {
+            FileResult photo = await MediaPicker.Default.CapturePhotoAsync();
+            try
+            {
+                if (photo != null)
+                {
+                    // save the file into local storage
+                    string localFilePath = Path.Combine(FileSystem.CacheDirectory, photo.FileName);
+
+                    using Stream sourceStream = await photo.OpenReadAsync();
+                    using FileStream localFileStream = File.OpenWrite(localFilePath);
+                    imageSource = localFilePath;
+                    await sourceStream.CopyToAsync(localFileStream);
+
+                    sourceStream.Dispose();
+                    localFileStream.Dispose();
+                    var imageBytes = File.ReadAllBytes(localFilePath);
+                    imageSource = Convert.ToBase64String(imageBytes);
+                    imageSource = string.Format("data:image/png;base64,{0}", imageSource);
+                    this.StateHasChanged();
+                }
+            }
+            catch (Exception ex)
+            {
+                var e = ex;
+                throw;
+            }
+         
+        }
+    }
+}
