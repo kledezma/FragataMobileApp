@@ -8,9 +8,19 @@
 
 <h3>Alumno</h3>
 
-<div class="row">
-    <div class="col-md-6">
+<div class="row justify-content-center margin-top">
+    <div class="col-md-2 margin-left-img">
         <img src="@imageSource" class="avatar" />
+        @if (imageSource == DefaultPhoto)
+        {
+            <button type="submit" class="btn btn-sm btn-success btnphoto" @onclick="TakePhoto">Tomar Foto</button>
+        }
+        else
+        {
+            <button type="submit" class="btn btn-sm btn-danger btnphoto" @onclick="DeletePhoto">Borrar Foto</button>
+        }
+    </div>
+    <div class="col-md-6">
 
         <div class="mb-3">
             <label class="form-label">Cedula</label>
@@ -45,8 +55,6 @@
 
 
         <button type="submit" class="btn btn-sm btn-success" @onclick="AddAlumno">Agregar</button>
-        <button type="submit" class="btn btn-sm btn-success" @onclick="TakePhoto">Foto</button>
-
         <button type="submit" class="btn btn-sm btn-danger" @onclick="BackToList">Regresar</button>
     </div>
 </div>
@@ -57,18 +65,16 @@
     private string alumnId = "";
     private string alumndNombre = "";
     private bool alumnActivo = true;
+    private string DefaultPhoto = "images/ic_launcher.png";
     private string imageSource = "";
+    private string photofilepath = "";
+
+
     protected async override void OnInitialized()
     {
         base.OnInitialized();
-        imageSource = "images/ic_launcher.png";
-
+        imageSource = DefaultPhoto;
         string path = Directory.GetCurrentDirectory();
-
-        if (Directory.Exists("images/ic_launcher.png"))
-        {
-            var x = "";
-        }
 
         alumnId = Id;
         if (alumnId != "" && alumnId != null)
@@ -125,6 +131,7 @@
 
     public void BackToList()
     {
+        DeleteData();
         navigationManager.NavigateTo("Alumnolist");
     }
 
@@ -143,6 +150,7 @@
                     using Stream sourceStream = await photo.OpenReadAsync();
                     using FileStream localFileStream = File.OpenWrite(localFilePath);
                     imageSource = localFilePath;
+                    photofilepath = localFilePath;
                     await sourceStream.CopyToAsync(localFileStream);
 
                     sourceStream.Dispose();
@@ -158,7 +166,25 @@
                 var e = ex;
                 throw;
             }
-         
+
         }
+    }
+
+    public async void DeletePhoto()
+    {
+        DeleteData();
+        this.StateHasChanged();
+
+    }
+
+    private void DeleteData()
+    {
+        if (photofilepath != "")
+        {
+        File.Delete(photofilepath);
+        photofilepath = "";
+        imageSource = DefaultPhoto;
+        }
+            
     }
 }

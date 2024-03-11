@@ -10,13 +10,15 @@
 <h3>Agregar Entrada / Salida</h3>
 
 
-<div class="row">
+<div class="row justify-content-center margin-top">
+    <div class="col-md-2 margin-left-img">
+
+            <img src="@imageSource" class="avatar" />
+    </div>
+
     <div class="col-md-6">
         <div class="mb-3">
-            <img src="@imageSource" class="avatar" />
 
-            <br />
-            <br />
             <label class="form-label">Cedula</label>
             <input type="text" @bind="alumnId" @oninput="chgCedula" class="form-control" placeholder="Id" />
         </div>
