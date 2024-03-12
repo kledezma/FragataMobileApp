@@ -7,11 +7,15 @@
 
 @inject NavigationManager navigationManager
 
-<h3>Agregar Entrada / Salida</h3>
+<button type="submit" class="btn btn-sm btn-danger" @onclick="BackToList">Regresar</button>
 
 
-<div class="row justify-content-center margin-top">
-    <div class="col-md-2 margin-left-img">
+<div class="card margin-top">
+    <div class="card-header">
+        <h5>Agregar Entrada / Salida</h5>
+    </div>
+<div class="row justify-content-center card-body">
+    <div class="col-md-3 ">
 
             <img src="@imageSource" class="avatar" />
     </div>
@@ -35,10 +39,9 @@
         </div>
      
         <button type="submit" class="btn btn-sm btn-success" @onclick="AddAlumno">Agregar</button>
-        <button type="submit" class="btn btn-sm btn-danger" @onclick="BackToList">Regresar</button>
     </div>
 </div>
-
+</div>
 @code {
 
     private string alumnId = "";

@@ -7,8 +7,8 @@
 
     <main>
         <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-      
+            <button type="submit" class="btn btn-sm btn-danger" @onclick="closeApp">Salir</button>
+
 
         </div>
 
@@ -17,3 +17,11 @@
         </article>
     </main>
 </div>
+
+@code{
+
+    private static void closeApp()
+    {
+        Application.Current.Quit();
+    }
+}

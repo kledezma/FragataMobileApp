@@ -6,10 +6,15 @@
 @inject IAlumnoRepository _alumnoRepository
 @inject NavigationManager navigationManager
 
-<h3>Alumno</h3>
+<button type="submit" class="btn btn-sm btn-danger" @onclick="BackToList">Regresar</button>
 
-<div class="row justify-content-center margin-top">
-    <div class="col-md-2 margin-left-img">
+
+<div class="card margin-top">
+    <div class="card-header">
+        <h5>Alumno</h5>
+    </div>
+<div class="row justify-content-center card-body">
+    <div class="col-md-3">
         <img src="@imageSource" class="avatar" />
         @if (imageSource == DefaultPhoto)
         {
@@ -55,8 +60,8 @@
 
 
         <button type="submit" class="btn btn-sm btn-success" @onclick="AddAlumno">Agregar</button>
-        <button type="submit" class="btn btn-sm btn-danger" @onclick="BackToList">Regresar</button>
     </div>
+</div>
 </div>
 
 @code {
@@ -65,7 +70,7 @@
     private string alumnId = "";
     private string alumndNombre = "";
     private bool alumnActivo = true;
-    private string DefaultPhoto = "images/ic_launcher.png";
+    private string DefaultPhoto = "images/FragataLogo.png";
     private string imageSource = "";
     private string photofilepath = "";
 
@@ -84,6 +89,7 @@
             alumndNombre = response.Nombre;
             alumnActivo = response.Activo;
             imageSource = response.Foto;
+            photofilepath = response.PathFoto;
             this.StateHasChanged();
         }
     }
@@ -95,6 +101,7 @@
         alumno.Nombre = alumndNombre;
         alumno.Activo = alumnActivo;
         alumno.Foto = imageSource;
+        alumno.PathFoto = photofilepath;
 
         var alreadyExist = await _alumnoRepository.GetAlumnoAsync(alumnId);
 
@@ -174,16 +181,15 @@
     {
         DeleteData();
         this.StateHasChanged();
-
     }
 
     private void DeleteData()
     {
         if (photofilepath != "")
         {
-        File.Delete(photofilepath);
-        photofilepath = "";
-        imageSource = DefaultPhoto;
+            File.Delete(photofilepath);
+            photofilepath = "";
+            imageSource = DefaultPhoto;
         }
             
     }

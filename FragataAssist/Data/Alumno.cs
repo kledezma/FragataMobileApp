@@ -18,6 +18,7 @@ namespace FragataAssist.Data
         public string Nombre { get; set; }
         public bool Activo { get; set; }
         public string Foto { get; set; }
+        public string PathFoto { get; set; }
 
     }
 }
