@@ -1,9 +1,11 @@
 ﻿@page "/addalumno"
 @page "/updatealumno/{Id}"
-
 @using FragataAssist.Services.AlumnoService
+@using FragataAssist.Services.AsistenciaService
 @using FragataAssist.Data
+@using Microsoft.Maui.Graphics.Platform
 @inject IAlumnoRepository _alumnoRepository
+@inject IAsistenciaRepository _asistenciaRepository
 @inject NavigationManager navigationManager
 
 <button type="submit" class="btn btn-sm btn-danger" @onclick="BackToList">Regresar</button>
@@ -15,7 +17,9 @@
     </div>
 <div class="row justify-content-center card-body">
     <div class="col-md-3">
-        <img src="@imageSource" class="avatar" />
+            <div class=" photocontainer">
+            <img src="@imageSource" class="avatar"/>
+            </div>
         @if (imageSource == DefaultPhoto)
         {
             <button type="submit" class="btn btn-sm btn-success btnphoto" @onclick="TakePhoto">Tomar Foto</button>
@@ -64,6 +68,47 @@
 </div>
 </div>
 
+
+@if ( Id != null)
+{ 
+<div class="card margin-top">
+    <div class="card-header">
+        <h5>Asistencia</h5>
+    </div>
+    <div class="row justify-content-center card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Cedula</th>
+                    <th>Hora</th>
+                    <th></th>
+
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var asistencia in asistenciaList)
+                {
+                    <tr>
+                        <td>@asistencia.Hora.ToShortDateString() @asistencia.Hora.ToShortTimeString()</td>
+
+                        @if (@asistencia.EntradaSalida)
+
+                        {
+                            <td>Entrada</td>
+                        }
+                        else
+                        {
+                            <td>Salida</td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+</div>
+}
+
 @code {
     [Parameter]
     public string Id { get; set; }
@@ -73,6 +118,7 @@
     private string DefaultPhoto = "images/FragataLogo.png";
     private string imageSource = "";
     private string photofilepath = "";
+    private IEnumerable<Asistencia> asistenciaList = Enumerable.Empty<Asistencia>();
 
 
     protected async override void OnInitialized()
@@ -84,6 +130,7 @@
         alumnId = Id;
         if (alumnId != "" && alumnId != null)
         {
+            asistenciaList = await _asistenciaRepository.GetAllAsistenciasAsync();
             var response = await _alumnoRepository.GetAlumnoAsync(alumnId);
             alumnId = response.IdAlumno;
             alumndNombre = response.Nombre;
@@ -154,13 +201,19 @@
                     // save the file into local storage
                     string localFilePath = Path.Combine(FileSystem.CacheDirectory, photo.FileName);
 
-                    using Stream sourceStream = await photo.OpenReadAsync();
                     using FileStream localFileStream = File.OpenWrite(localFilePath);
+
+                    using Stream sourceStream = await photo.OpenReadAsync();
+                    Microsoft.Maui.Graphics.IImage image = PlatformImage.FromStream(sourceStream);
+                    var resizeImg = image.Resize(400, 400);
+                    var str = resizeImg.AsStream();
                     imageSource = localFilePath;
                     photofilepath = localFilePath;
-                    await sourceStream.CopyToAsync(localFileStream);
 
-                    sourceStream.Dispose();
+                    await str.CopyToAsync(localFileStream);
+                    // await sourceStream.CopyToAsync(localFileStream);
+                    str.Dispose();
+                    // sourceStream.Dispose();
                     localFileStream.Dispose();
                     var imageBytes = File.ReadAllBytes(localFilePath);
                     imageSource = Convert.ToBase64String(imageBytes);
@@ -193,4 +246,6 @@
         }
             
     }
+
+
 }

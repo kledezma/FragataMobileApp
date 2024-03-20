@@ -16,8 +16,10 @@
 <div class="row justify-content-center card-body">
     <div class="col-md-3 ">
 
-            <img src="@imageSource" class="avatar" />
-    </div>
+            <div class=" photocontainer">
+                <img src="@imageSource" class="avatar" />
+            </div>
+        </div>
 
     <div class="col-md-6">
         <div class="mb-3">
@@ -38,10 +40,16 @@
         </div>
      
         <button type="submit" class="btn btn-sm btn-success" @onclick="AddAlumno">Agregar</button>
+
+        <button type="button" class="btn btn-sm btn-success" @onclick="OnListDialogOpen">Agregar</button>
     </div>
 </div>
 </div>
-
+@if (ListModalOpen)
+{
+    <FragataAssist.Pages.Modals.SearchAlumno OnClose="OnListDialogClose" ListAlumnos="ListAlumnos"></FragataAssist.Pages.Modals.SearchAlumno>
+}
+    
 
 @code {
 
@@ -52,11 +60,29 @@
     private string scurrentDate;
     private string imageSource = "images/ic_launcher.png";
     private string originalSource = "images/ic_launcher.png";
+    private bool ListModalOpen { set; get; }
+    private IEnumerable<Alumno> ListAlumnos;
+
+    private  void OnListDialogClose(Alumno alumnselected)
+    {
+        ListModalOpen = false;
+        if (alumnselected != null)
+        {
+            this.alumnId = alumnselected.IdAlumno;
+            GetImageSource(this.alumnId);
+        }
+        StateHasChanged();
+    }
+    private void OnListDialogOpen()
+    {
+        ListModalOpen = true;
+        StateHasChanged();
+    }
 
     protected async override void OnInitialized()
     {
+        ListAlumnos = await _alumnoRepository.GetAlumnosByActivoAsync(true);
         base.OnInitialized();
-
     }
 
     public async void AddAlumno()
@@ -87,16 +113,25 @@
     public async void chgCedula(ChangeEventArgs args)
     {
         string cedula = (string)args.Value;
+
+        GetImageSource(cedula);
+    }
+
+    private async void GetImageSource(string cedula)
+    {
+        
         var exist = await _alumnoRepository.GetAlumnoAsync(cedula);
 
         if (exist != null)
         {
             imageSource = exist.Foto;
         }
-        else { 
-            imageSource = originalSource; 
+        else
+        {
+            imageSource = originalSource;
         }
         this.StateHasChanged();
+
     }
 
     public void BackToList()

@@ -52,7 +52,16 @@ namespace FragataAssist.Services.AsistenciaService
         }
         public async Task<IEnumerable<Asistencia>> GetAsistenciasByCedulaAsync(string cedula)
         {
+            try
+            {
             return await _db.Table<Asistencia>().Where(p => p.IdAlumno == cedula).ToListAsync();
+
+            }
+            catch (Exception ex)
+            {
+                var x = ex;
+                throw;
+            }
 
         }
 

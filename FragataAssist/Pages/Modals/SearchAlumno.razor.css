@@ -1,14 +1,3 @@
-﻿.cardmodal
-{
-    position: absolute;
-    z-index: 3;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+﻿#mycard {
+    width: 800px
 }

@@ -1,9 +1,73 @@
-﻿<div class="cardmodal">
-    <div class="modal">
-        <span class="title">Add</span>
-        <span class="close">Times</span>
+﻿@using FragataAssist.Data
+
+﻿<div class="modal fade show" id="myModal" style="display:block; background-color: rgba(10,10,10,.8);" aria-modal="true" role="dialog">
+    <div id="mycard" class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Estudiantes</h4>
+                <button type="button" class="close" @onclick="@ModalCancel">&times;</button>
+            </div>
+            <div class="modal-body">
+               <label class="form-label">Escriba Cedula o Nombre:</label>
+                <input type="text" @oninput="ChangeInput" class="form-control" placeholder="Id" />
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Cedula</th>
+                            <th>Nombre</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var alumno in Filter)
+                        {
+                            <tr>
+                                <td>@alumno.IdAlumno</td>
+                                <td>@alumno.Nombre</td>
+                                <td>
+                                    <button class="btn-info" @onclick=@(()=> ModalOk(alumno))>Seleccionar</button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
     </div>
 </div>
 @code {
+    [Parameter]
+    public EventCallback<Alumno> OnClose { get; set; }
+
+    [Parameter]
+    public IEnumerable<Alumno> ListAlumnos { get; set; }
+    public IEnumerable<Alumno> Filter { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        Filter = ListAlumnos;
+    }
+
+    private Task ModalCancel()
+    {
+
+        return OnClose.InvokeAsync(null);
+    }
+
+    private Task ModalOk(Alumno objAlumno)
+    {
+        return OnClose.InvokeAsync(objAlumno);
+    }
+
+    private void ChangeInput(ChangeEventArgs args)
+    {
+        string escriba = (string)args.Value;
+        Filter = ListAlumnos.Where(s => s.Nombre.Contains(escriba) || s.IdAlumno.Contains(escriba)).ToList();
+        this.StateHasChanged();
+
+    }
 
 }
