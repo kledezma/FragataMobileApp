@@ -33,7 +33,7 @@
 
     <ItemGroup>
         <!-- App Icon -->
-		<MauiIcon Include="Resources\AppIcon\fragataicon2.svg" BaseSize="45,45" />
+		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" ForegroundScale ="1" />
 
 
 		<!-- Splash Screen -->
@@ -61,7 +61,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Content Include="Resources\Images\FragataLogo.png">
+      <Content Include="Resources\Images\fragatalogo.png">
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </Content>
