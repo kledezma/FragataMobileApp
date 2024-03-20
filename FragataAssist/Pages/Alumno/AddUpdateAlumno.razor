@@ -15,98 +15,106 @@
     <div class="card-header">
         <h5>Alumno</h5>
     </div>
-<div class="row justify-content-center card-body">
-    <div class="col-md-3">
-            <div class=" photocontainer">
-            <img src="@imageSource" class="avatar"/>
-            </div>
-        @if (imageSource == DefaultPhoto)
-        {
-            <button type="submit" class="btn btn-sm btn-success btnphoto" @onclick="TakePhoto">Tomar Foto</button>
-        }
-        else
-        {
-            <button type="submit" class="btn btn-sm btn-danger btnphoto" @onclick="DeletePhoto">Borrar Foto</button>
-        }
-    </div>
-    <div class="col-md-6">
-
-        <div class="mb-3">
-            <label class="form-label">Cedula</label>
-            @if (Id == "" || Id == null)
-
-            {
-                <input type="text" @bind="alumnId" class="form-control" placeholder="Id" />
-            }
-            else
-            {
-                <input type="text" @bind="alumnId" class="form-control" placeholder="Id" readonly />
-            }
-
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Nombre</label>
-            <input type="text" @bind="alumndNombre" class="form-control" placeholder="Name" />
-            @*            @if (this.Id == "")
-            {
-                <input type="text" @bind="alumndNombre" class="form-control" placeholder="Name" />
-            }
-            else
-            {
-                <input type="text" @bind="alumndNombre" class="form-control" placeholder="Name" readonly />
-            } *@
-
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Activo</label>
-            <input type="checkbox" @bind="alumnActivo" />
-        </div>
-
-
-        <button type="submit" class="btn btn-sm btn-success" @onclick="AddAlumno">Agregar</button>
-    </div>
-</div>
-</div>
-
-
-@if ( Id != null)
-{ 
-<div class="card margin-top">
-    <div class="card-header">
-        <h5>Asistencia</h5>
-    </div>
     <div class="row justify-content-center card-body">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Cedula</th>
-                    <th>Hora</th>
-                    <th></th>
+        <div class="col-md-3">
+            <div class=" photocontainer">
+                <img src="@imageSource" class="avatar" />
+            </div>
+            @if (imageSource == DefaultPhoto)
+            {
+                <button type="submit" class="btn btn-sm btn-success btnphoto" @onclick="TakePhoto">Tomar Foto</button>
+            }
+            else
+            {
+                <button type="submit" class="btn btn-sm btn-danger btnphoto" @onclick="DeletePhoto">Borrar Foto</button>
+            }
+        </div>
+        <div class="col-md-6">
 
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var asistencia in asistenciaList)
+            <div class="mb-3">
+                <label class="form-label">Cedula</label>
+                @if (Id == "" || Id == null)
+
                 {
-                    <tr>
-                        <td>@asistencia.Hora.ToShortDateString() @asistencia.Hora.ToShortTimeString()</td>
-
-                        @if (@asistencia.EntradaSalida)
-
-                        {
-                            <td>Entrada</td>
-                        }
-                        else
-                        {
-                            <td>Salida</td>
-                        }
-                    </tr>
+                    <input type="text" @bind="alumnId" class="form-control" placeholder="Id" />
                 }
-            </tbody>
-        </table>
+                else
+                {
+                    <input type="text" @bind="alumnId" class="form-control" placeholder="Id" readonly />
+                }
 
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Nombre</label>
+                <input type="text" @bind="alumndNombre" class="form-control" placeholder="Name" />
+                @*            @if (this.Id == "")
+                {
+                <input type="text" @bind="alumndNombre" class="form-control" placeholder="Name" />
+                }
+                else
+                {
+                <input type="text" @bind="alumndNombre" class="form-control" placeholder="Name" readonly />
+                } *@
+
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Activo</label>
+                <input type="checkbox" @bind="alumnActivo" />
+            </div>
+
+
+            <button type="submit" class="btn btn-sm btn-success" @onclick="AddAlumno">Agregar</button>
+        </div>
     </div>
 </div>
+
+
+@if (Id != null)
+{
+    <div class="card margin-top">
+        <div class="card-header">
+            <h5>Asistencia</h5>
+        </div>
+        <div class="row justify-content-center card-body">
+            @if (asistenciaList.Count() > 0)
+            {
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Cedula</th>
+                            <th>Hora</th>
+                            <th></th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var asistencia in asistenciaList)
+                        {
+                            <tr>
+                                <td>@asistencia.Hora.ToShortDateString() @asistencia.Hora.ToShortTimeString()</td>
+
+                                @if (@asistencia.EntradaSalida)
+
+                                {
+                                    <td>Entrada</td>
+                                }
+                                else
+                                {
+                                    <td>Salida</td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="alert alert-info" role="alert">
+                    Este alumno no tiene asistencias
+                </div>
+            }
+        </div>
+    </div>
 }
 
 @code {
@@ -130,7 +138,7 @@
         alumnId = Id;
         if (alumnId != "" && alumnId != null)
         {
-            asistenciaList = await _asistenciaRepository.GetAllAsistenciasAsync();
+            asistenciaList = await _asistenciaRepository.GetAsistenciasByCedulaAsync(alumnId);
             var response = await _alumnoRepository.GetAlumnoAsync(alumnId);
             alumnId = response.IdAlumno;
             alumndNombre = response.Nombre;
@@ -244,7 +252,7 @@
             photofilepath = "";
             imageSource = DefaultPhoto;
         }
-            
+
     }
 
 
